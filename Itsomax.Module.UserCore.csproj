@@ -2,6 +2,22 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <PreserveCompilationContext>false</PreserveCompilationContext>
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
+    <OutputType>Library</OutputType>
+    <Description>Module to manage users, roles and permitions over modules</Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Mathias Kowoll</Authors>
+    <Company>IT-SOMAX</Company>
+    <PackageReleaseNotes>Module to manage users, roles and permitions over modules</PackageReleaseNotes>
+    <Copyright>Mathias Kowoll, IT-SOMAX @2018</Copyright>
+    <PackageLicenseUrl>https://github.com/MathiasKowoll/Itsomax.Modules.UserCore/blob/master/LICENSE.md</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/MathiasKowoll/Itsomax.Modules.UserCore</PackageProjectUrl>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Update="Microsoft.NETCore.App" Version="2.0.5" />
+    <PackageReference Include="Itsomax.Module.Core" Version="1.0.7" />
+    <PackageReference Include="Itsomax.Data.Infrastructure" Version="1.0.4" />
+  </ItemGroup>
 </Project>
