@@ -9,19 +9,16 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Mathias Kowoll</Authors>
     <Company>IT-SOMAX</Company>
-    <PackageReleaseNotes>Module to manage users, roles and permitions over modules</PackageReleaseNotes>
+    <PackageReleaseNotes>refactor code</PackageReleaseNotes>
     <Copyright>Mathias Kowoll, IT-SOMAX @2018</Copyright>
     <PackageLicenseUrl>https://github.com/MathiasKowoll/Itsomax.Modules.UserCore/blob/master/LICENSE.md</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/MathiasKowoll/Itsomax.Modules.UserCore</PackageProjectUrl>
+    <Version>1.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Update="Microsoft.NETCore.App" Version="2.0.5" />
     <PackageReference Include="Itsomax.Data.Infrastructure" Version="1.0.4" />
+    <PackageReference Include="Itsomax.Module.Core" Version="1.0.8" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Itsomax.Module.Core\Itsomax.Module.Core.csproj" />
-  </ItemGroup>
-
 </Project>
