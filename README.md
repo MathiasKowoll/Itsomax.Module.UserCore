@@ -1,1 +1,1 @@
-# Core Module for ItsomaxCMS
+# Core Module for User Management
