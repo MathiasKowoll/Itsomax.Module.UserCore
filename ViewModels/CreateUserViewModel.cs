@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Mvc.DataAnnotations.Internal;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Itsomax.Module.UserCore.ViewModels

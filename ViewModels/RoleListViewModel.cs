@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Itsomax.Module.UserCore.ViewModels
+﻿namespace Itsomax.Module.UserCore.ViewModels
 {
     public class RoleListViewModel
     {

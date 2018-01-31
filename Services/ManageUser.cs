@@ -18,20 +18,18 @@ namespace Itsomax.Module.UserCore.Services
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
-        private readonly SignInManager<User> _signIn;
         private readonly IRepository<User> _user;
         private readonly IRepository<Role> _role;
         private readonly IRepository<SubModule> _subModule;
         private readonly IRepository<ModuleRole> _moduleRole;
         private readonly ILogginToDatabase _logger;
 
-        public ManageUser(UserManager<User> userManager, RoleManager<Role> roleManager, SignInManager<User> signIn,
+        public ManageUser(UserManager<User> userManager, RoleManager<Role> roleManager,
                          IRepository<Role> role, IRepository<User> user, IRepository<SubModule> subModule,
                          IRepository<ModuleRole> moduleRole, ILogginToDatabase logger)
         {
             _roleManager = roleManager;
             _userManager = userManager;
-            _signIn = signIn;
             _user = user;
             _role = role;
             _subModule = subModule;
@@ -57,9 +55,9 @@ namespace Itsomax.Module.UserCore.Services
 
         }
 
-        public void AddSubModulesToRole (long RoleId,params string[] subModules)
+        public void AddSubModulesToRole (long roleId,params string[] subModules)
         {
-            var modRole = _moduleRole.Query().Where(x => x.RoleId == RoleId);
+            var modRole = _moduleRole.Query().Where(x => x.RoleId == roleId);
             foreach (var item in modRole)
             {
                 var modrole = _moduleRole.Query().FirstOrDefault(x => x.RoleId == item.RoleId && x.SubModuleId == item.SubModuleId);
@@ -70,13 +68,15 @@ namespace Itsomax.Module.UserCore.Services
             foreach (var item in subModules)
             {
                 var mod = _subModule.Query().FirstOrDefault(x => x.Name.Contains(item));
-                ModuleRole modrole = new ModuleRole
+                if (mod != null)
                 {
-                    RoleId = RoleId,
-                    SubModuleId = mod.Id
-                };
-                _moduleRole.Add(modrole);
-                
+                    ModuleRole modrole = new ModuleRole
+                    {
+                        RoleId = roleId,
+                        SubModuleId = mod.Id
+                    };
+                    _moduleRole.Add(modrole);
+                }
             }
             _moduleRole.SaveChange();
             UpdateClaimValueForRole();
@@ -84,9 +84,9 @@ namespace Itsomax.Module.UserCore.Services
 
 
 
-        public IEnumerable<SelectListItem> GetUserRolesToSelectListItem(int UserId)
+        public IEnumerable<SelectListItem> GetUserRolesToSelectListItem(int userId)
         {
-            var user = _userManager.FindByIdAsync(UserId.ToString()).Result;
+            var user = _userManager.FindByIdAsync(userId.ToString()).Result;
             if (user == null)
             {
                 return null;
@@ -115,11 +115,11 @@ namespace Itsomax.Module.UserCore.Services
         }
             
         
-        public IEnumerable<SelectListItem> GetRoleModulesToSelectListItem(long RoleId)
+        public IEnumerable<SelectListItem> GetRoleModulesToSelectListItem(long roleId)
         {
             try
             {
-                var role = _roleManager.FindByIdAsync(RoleId.ToString()).Result;
+                var role = _roleManager.FindByIdAsync(roleId.ToString()).Result;
                 if(role == null)
                 {
                     return null;
@@ -148,14 +148,14 @@ namespace Itsomax.Module.UserCore.Services
         }
         
 
-        public IList<string> GetSubmodulesByRoleId(long Id)
+        public IList<string> GetSubmodulesByRoleId(long id)
         {
             try
             {
                 var subModRole =
                 from mr in _moduleRole.Query().ToList()
                 join sb in _subModule.Query().ToList() on mr.SubModuleId equals sb.Id
-                where mr.RoleId == Id
+                where mr.RoleId == id
                 select (sb.Name);
 
                 return (subModRole.ToList());
@@ -179,9 +179,9 @@ namespace Itsomax.Module.UserCore.Services
             }
         }
 
-        public bool CreateUserAddDefaultClaim(long Id)
+        public bool CreateUserAddDefaultClaim(long id)
         {
-            var user = _userManager.FindByIdAsync(Id.ToString()).Result;
+            var user = _userManager.FindByIdAsync(id.ToString()).Result;
 
             var claims = new List<Claim>();
             var claimsRemove = new List<Claim>();
@@ -192,18 +192,18 @@ namespace Itsomax.Module.UserCore.Services
                 x.Name
 
             }).ToList();
-            var claimExistDB = _userManager.GetClaimsAsync(user).Result;
+            var claimExistDb = _userManager.GetClaimsAsync(user).Result;
             foreach (var item in claimsList)
             {
-                var claimExistDBType = claimExistDB.FirstOrDefault(x => x.Type == item.Name);
-                if (claimExistDBType == null)
+                var claimExistDbType = claimExistDb.FirstOrDefault(x => x.Type == item.Name);
+                if (claimExistDbType == null)
                 {
                     claims.Add(new Claim(item.Name, "NoAccess"));
                 }
 
             }
             var res = _userManager.AddClaimsAsync(user, claims).Result;
-            foreach (var item in claimExistDB)
+            foreach (var item in claimExistDb)
             {
                 var claimExistsDll = claimsList.FirstOrDefault(x => x.Name == item.Type);
                 if (claimExistsDll == null)
@@ -223,7 +223,7 @@ namespace Itsomax.Module.UserCore.Services
             {
                 var user = _userManager.FindByIdAsync(itemUser.Id.ToString()).Result;
                 var roles = _userManager.GetRolesAsync(user).Result;
-                var rolesDB = _role.Query().Where(x => roles.Contains(x.Name)).ToList();
+                var rolesDb = _role.Query().Where(x => roles.Contains(x.Name)).ToList();
                 var subModules = _subModule.Query().ToList();
 
                 foreach (var subMod in subModules)
@@ -233,7 +233,7 @@ namespace Itsomax.Module.UserCore.Services
                     var res =_userManager.ReplaceClaimAsync(user, oldClaim, newClaim).Result;
                 }
                 
-                foreach (var role in rolesDB)
+                foreach (var role in rolesDb)
                 {
                     var subModulesUser = GetSubmodulesByRoleId(role.Id);
                     foreach (var item in subModulesUser)

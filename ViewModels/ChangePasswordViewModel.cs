@@ -1,13 +1,8 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 namespace Itsomax.Module.UserCore.ViewModels
 {
     public class ChangePasswordViewModel
     {
-        public ChangePasswordViewModel()
-        {
-            
-        }
         [Required]
 		[DataType(DataType.Password)]
 		public string CurrentPassword { get; set; }
