@@ -84,7 +84,7 @@ namespace Itsomax.Module.UserCore.Services
 
 
 
-        public IEnumerable<SelectListItem> GetUserRolesToSelectListItem(int userId)
+        public IEnumerable<SelectListItem> GetUserRolesToSelectListItem(long userId)
         {
             var user = _userManager.FindByIdAsync(userId.ToString()).Result;
             if (user == null)

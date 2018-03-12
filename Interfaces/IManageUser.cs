@@ -9,7 +9,7 @@ namespace Itsomax.Module.UserCore.Interfaces
     public interface IManageUser
     {
         Task<SucceededTask> EditRole(EditRoleViewModel model, params string[] subModulesAdd);
-        IEnumerable<SelectListItem> GetUserRolesToSelectListItem(int userId);
+        IEnumerable<SelectListItem> GetUserRolesToSelectListItem(long userId);
         IEnumerable<SelectListItem> GetRoleModulesToSelectListItem(long roleId);
         IList<string> GetSubmodulesByRoleId(long id);
         void AddDefaultClaimAllUsers();
