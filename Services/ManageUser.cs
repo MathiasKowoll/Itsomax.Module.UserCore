@@ -63,7 +63,7 @@ namespace Itsomax.Module.UserCore.Services
                 var modrole = _moduleRole.Query().FirstOrDefault(x => x.RoleId == item.RoleId && x.SubModuleId == item.SubModuleId);
                 _moduleRole.Remove(modrole);
             }
-            _moduleRole.SaveChange();
+            _moduleRole.SaveChanges();
 
             foreach (var item in subModules)
             {
@@ -78,7 +78,7 @@ namespace Itsomax.Module.UserCore.Services
                     _moduleRole.Add(modrole);
                 }
             }
-            _moduleRole.SaveChange();
+            _moduleRole.SaveChanges();
             UpdateClaimValueForRole();
         }
 
