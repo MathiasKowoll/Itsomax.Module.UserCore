@@ -18,9 +18,6 @@
 
   <ItemGroup>
     <PackageReference Update="Microsoft.NETCore.App" Version="2.1.0-preview1-26216-03" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Itsomax.Module.Core\Itsomax.Module.Core.csproj" />
+    <PackageReference Include="Itsomax.Module.Core" Version="2.0.1-preview1" />
   </ItemGroup>
 </Project>
