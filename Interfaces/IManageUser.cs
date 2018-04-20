@@ -13,7 +13,10 @@ namespace Itsomax.Module.UserCore.Interfaces
         IEnumerable<SelectListItem> GetRoleModulesToSelectListItem(long roleId);
         IList<string> GetSubmodulesByRoleId(long id);
         void AddDefaultClaimAllUsers();
-        bool CreateUserAddDefaultClaim(long id);
-        void UpdateClaimValueForRole();
+        //bool CreateUserAddDefaultClaim(long id);
+        //void UpdateClaimValueForRole();
+        Task<SucceededTask> EditUserAsync(EditUserViewModel model, params string[] rolesAdd);
+        Task<SucceededTask> CreateUserAsync(CreateUserViewModel model, params string[] selectedRoles);
+        Task<SucceededTask> UserLoginAsync(LoginUserViewModel model);
     }
 }

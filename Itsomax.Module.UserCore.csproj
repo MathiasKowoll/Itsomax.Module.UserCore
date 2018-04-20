@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -17,7 +17,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Update="Microsoft.NETCore.App" Version="2.1.0-preview1-26216-03" />
-    <PackageReference Include="Itsomax.Module.Core" Version="2.0.1-preview1" />
+    <ProjectReference Include="..\Itsomax.Module.Core\Itsomax.Module.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.NETCore.App" Version="2.1.0-preview2-26406-04" />
   </ItemGroup>
 </Project>
