@@ -116,7 +116,7 @@ namespace Itsomax.Module.UserCore.Services
 
         public async Task<SucceededTask> EditUserAsync(EditUserViewModel model, params string[] rolesAdd)
         {
-            var roles = GetUserRolesToSelectListItem(model.Id);
+            //var roles = GetUserRolesToSelectListItem(model.Id);
             var user = await _userManager.FindByIdAsync(model.Id.ToString());
             if ((user == null) || (user.Id != model.Id))
             {
@@ -125,9 +125,9 @@ namespace Itsomax.Module.UserCore.Services
 
             switch (user.UserName.ToUpper())
             {
-                case "ADMIN" when model.IsDeleted == true:
+                case "ADMIN" when model.IsDeleted:
                     return SucceededTask.Failed("User Admin cannot be disabled");
-                case "ADMIN" when model.IsLocked == true:
+                case "ADMIN" when model.IsLocked:
                     return SucceededTask.Failed("User Admin cannot be locked");
                 case "ADMIN" when !String.Equals(user.UserName, model.UserName, StringComparison.CurrentCultureIgnoreCase):
                     return SucceededTask.Failed("Username for Admin cannot be changed");
@@ -148,7 +148,7 @@ namespace Itsomax.Module.UserCore.Services
                     var resAdd = await _userManager.AddToRolesAsync(user, rolesAdd);
                     if (resAdd.Succeeded)
                     {
-                        var time = Convert.ToDateTime(model.IsLocked == true ? "3000-01-01" : "1970-01-01");
+                        var time = Convert.ToDateTime(model.IsLocked ? "3000-01-01" : "1970-01-01");
                         var resL = await _userManager.SetLockoutEndDateAsync(user, time);
                         if (resL.Succeeded)
                         {
@@ -287,7 +287,7 @@ namespace Itsomax.Module.UserCore.Services
             catch(Exception ex)
             {
                 _logger.ErrorLog(ex.Message, "GetSubmodulesByRoleId", ex.InnerException.Message);
-                var subModule = new List<string> ();
+                //var subModule = new List<string> ();
                 return null;
             }
 
@@ -296,11 +296,11 @@ namespace Itsomax.Module.UserCore.Services
 
         public void AddDefaultClaimAllUsers()
         {
-            var users = _user.Query().ToList();
-            foreach (var item in users)
-            {
+            //var users = _user.Query().ToList();
+            //foreach (var item in users)
+            //{
                 //CreateUserAddDefaultClaim(item.Id);
-            }
+            //}
         }
         /*
         public bool CreateUserAddDefaultClaim(long id)
