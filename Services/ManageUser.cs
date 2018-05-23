@@ -277,8 +277,8 @@ namespace Itsomax.Module.UserCore.Services
             try
             {
                 var subModRole =
-                from mr in _moduleRole.Query().ToList()
-                join sb in _subModule.Query().ToList() on mr.SubModuleId equals sb.Id
+                from mr in _moduleRole.Query()
+                join sb in _subModule.Query() on mr.SubModuleId equals sb.Id
                 where mr.RoleId == id
                 select (sb.Name);
 
