@@ -9,7 +9,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Mathias Kowoll</Authors>
     <Company>IT-SOMAX</Company>
-    <PackageReleaseNotes>Added .net core 2.1 rc1</PackageReleaseNotes>
+    <PackageReleaseNotes>Added .net core 2.1</PackageReleaseNotes>
     <Copyright>Mathias Kowoll, IT-SOMAX @2018</Copyright>
     <PackageLicenseUrl>https://github.com/MathiasKowoll/Itsomax.Modules.UserCore/blob/master/LICENSE.md</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/MathiasKowoll/Itsomax.Modules.UserCore</PackageProjectUrl>
@@ -20,6 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" Version="2.1.0" />
+    <PackageReference Update="Microsoft.NETCore.App" Version="2.1.0" />
   </ItemGroup>
 </Project>
