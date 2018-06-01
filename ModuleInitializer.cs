@@ -15,7 +15,7 @@ namespace Itsomax.Module.UserCore
 
         public void ConfigureServices(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<IManageUser, ManageUser>();
+            serviceCollection.AddScoped<IManageUser, ManageUser>();
         }
     }
 }

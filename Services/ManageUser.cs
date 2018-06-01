@@ -40,51 +40,88 @@ namespace Itsomax.Module.UserCore.Services
 
         }
 
-        public async Task<SucceededTask> UserLoginAsync(LoginUserViewModel model)
+        public async Task<SystemSucceededTask> UserLoginAsync(LoginUserViewModel model)
         {
-            var user = await _userManager.FindByNameAsync(model.UserName);
-            if (user == null)
+            try
             {
-                return SucceededTask.Failed("User does not exists or tried to enter null value for user.");
-            }
-            if (user.IsDeleted)
-            {
-                return SucceededTask.Failed("User: "+user.UserName+" has been disabled");
-            }
+                var user = await _userManager.FindByNameAsync(model.UserName);
+                if (user == null)
+                {
+                    _logger.ErrorLog("User does not exists or tried to enter null value for user.","Login User",string.Empty,model.UserName);
+                    return SystemSucceededTask.Failed("User does not exists or tried to enter null value for user.",string.Empty,false,true);
+                }
+                if (user.IsDeleted)
+                {
+                    _logger.ErrorLog("User: "+user.UserName+" has been disabled","Login User",string.Empty,model.UserName);
+                    return SystemSucceededTask.Failed("User: "+user.UserName+" has been disabled","Login User",false,true);
+                }
 
-            var res = await _signIn.PasswordSignInAsync(user,model.Password,model.RememberMe,true);
-            if (res.Succeeded)
-            {
-                CreateUserAddDefaultClaimForUser(user);
-                UpdateClaimValueForRoleForUser(user);
-                return SucceededTask.Success;
+                try
+                {
+                    var res = await _signIn.PasswordSignInAsync(user,model.Password,model.RememberMe,true);
+                    if (res.Succeeded)
+                    {
+                        CreateUserAddDefaultClaimForUser(user);
+                        UpdateClaimValueForRoleForUser(user);
+                        _logger.InformationLog("User: "+user.UserName+" logged successfully","Login User",string.Empty,model.UserName);
+                        return SystemSucceededTask.Success("");
+                    }
+                    if (res.IsLockedOut)
+                    {
+                        _logger.ErrorLog("User: "+user.UserName+" has been locked out","Login User",string.Empty,model.UserName);
+                        return SystemSucceededTask.Failed("User " + user.UserName + " is lockout","Login User",false,true);
+                    }
+                    _logger.ErrorLog("User: "+user.UserName+" could not be logged in","Login User",string.Empty,model.UserName);
+                    return SystemSucceededTask.Failed("User: "+user.UserName+" could not be logged in","Login User",false,true);
+                }
+                catch (Exception ex)
+                {
+                    _logger.ErrorLog(ex.Message,"Login User",ex.InnerException.Message,model.UserName);
+                    return SystemSucceededTask.Failed("User: "+model.UserName+" could not be logged in","Login User",true,false);
+                }
+                
             }
-
-            if (res.IsLockedOut)
+            catch (Exception ex)
             {
-                return SucceededTask.Failed("User " + user.UserName + " is lockout");
+                _logger.ErrorLog(ex.Message,"Login User",ex.InnerException.Message,model.UserName);
+                return SystemSucceededTask.Failed("User: "+model.UserName+" could not be logged in","Login User",true,false);
             }
-            return SucceededTask.Failed("An error ocurred ");
             
         }
 
-        public async Task<SucceededTask> EditRole(EditRoleViewModel model, params string [] subModulesAdd)
+        public async Task<SystemSucceededTask> EditRole(EditRoleViewModel model,string userName, params string [] subModulesAdd)
         {
-            var role = _roleManager.FindByIdAsync(model.Id.ToString()).Result;
-            role.Name = model.RoleName;
-
-            var res = await _roleManager.UpdateAsync(role);
-            if (res.Succeeded)
+            try
             {
-                AddSubModulesToRole(role.Id,subModulesAdd);
-                return SucceededTask.Success;
-            }
-            else
-                return SucceededTask.Failed("FailedUpdateRole");
+                var role = await _roleManager.FindByIdAsync(model.Id.ToString());
+                role.Name = model.RoleName;
 
+                try
+                {
+                    var res = await _roleManager.UpdateAsync(role);
+                    if (res.Succeeded)
+                    {
+                        AddSubModulesToRole(role.Id,subModulesAdd);
+                        _logger.InformationLog("Role: "+role.Name+ " updated successfully","Role Edit",string.Empty,userName);
+                        return SystemSucceededTask.Success("Role: "+role.Name+ " updated successfully");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.ErrorLog(ex.Message,"Edit Role",ex.InnerException.Message,userName);
+                    return SystemSucceededTask.Failed("Role: "+model.RoleName+ " updated unsuccessfully",ex.InnerException.Message,true,false);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.ErrorLog(ex.Message,"Edit Role",ex.InnerException.Message,userName);
+                return SystemSucceededTask.Failed("Role: "+model.RoleName+ " updated unsuccessfully",ex.InnerException.Message,true,false);
+            }
+            _logger.ErrorLog("Unhandled error","Edit Role",string.Empty,userName);
+            return SystemSucceededTask.Failed("Role: "+model.RoleName+ " updated successfully",string.Empty,true,false);
         }
 
-        public async Task<SucceededTask> CreateUserAsync(CreateUserViewModel model,params string[] selectedRoles)
+        public async Task<SystemSucceededTask> CreateUserAsync(CreateUserViewModel model,string userName,params string[] selectedRoles)
         {
             var user = new User()
             {
@@ -100,37 +137,39 @@ namespace Itsomax.Module.UserCore.Services
                 {
                     CreateUserAddDefaultClaimForUser(user);
                     UpdateClaimValueForRoleForUser(user);
-                    return SucceededTask.Success;
+                    _logger.InformationLog("User "+model.UserName+" has been created succesfully", "Create user", string.Empty, userName);
+                    return SystemSucceededTask.Success("User: " +model.UserName+" created successfully");
                 }
-                else
-                {
-                    await _userManager.DeleteAsync(user);
-                    return SucceededTask.Failed("Error while creating user " + model.UserName);
-                }
+
+                await _userManager.DeleteAsync(user);
+                _logger.ErrorLog("Error while creating user ", "Create user", string.Empty, userName);
+                return SystemSucceededTask.Failed("Error while creating user " + model.UserName,string.Empty,false,true);
             }
-            else
-            {
-                return SucceededTask.Failed("Error while creating user " + model.UserName);
-            }
+            _logger.ErrorLog("Error while creating user ", "Create user", string.Empty, userName);
+            return SystemSucceededTask.Failed("Error while creating user " + model.UserName,string.Empty,false,true);
         }
 
-        public async Task<SucceededTask> EditUserAsync(EditUserViewModel model, params string[] rolesAdd)
+        public async Task<SystemSucceededTask> EditUserAsync(EditUserViewModel model,string userName, params string[] rolesAdd)
         {
             //var roles = GetUserRolesToSelectListItem(model.Id);
             var user = await _userManager.FindByIdAsync(model.Id.ToString());
             if ((user == null) || (user.Id != model.Id))
             {
-                return SucceededTask.Failed("User: " + model.UserName + " not found");
+                _logger.ErrorLog("User: " + model.UserName + " not found","Edit User",string.Empty,userName);
+                return SystemSucceededTask.Failed("User: " + model.UserName + " not found",string.Empty,false,true);
             }
 
             switch (user.UserName.ToUpper())
             {
                 case "ADMIN" when model.IsDeleted:
-                    return SucceededTask.Failed("User Admin cannot be disabled");
+                    _logger.ErrorLog("User Admin cannot be disabled","Edit User",string.Empty,userName);
+                    return SystemSucceededTask.Failed("User Admin cannot be disabled",string.Empty,false,true);
                 case "ADMIN" when model.IsLocked:
-                    return SucceededTask.Failed("User Admin cannot be locked");
-                case "ADMIN" when !String.Equals(user.UserName, model.UserName, StringComparison.CurrentCultureIgnoreCase):
-                    return SucceededTask.Failed("Username for Admin cannot be changed");
+                    _logger.ErrorLog("User Admin cannot be disabled","Edit User",string.Empty,userName);
+                    return SystemSucceededTask.Failed("User Admin cannot be locked",string.Empty,false,true);
+                case "ADMIN" when !string.Equals(user.UserName, model.UserName, StringComparison.CurrentCultureIgnoreCase):
+                    _logger.ErrorLog("Username for Admin cannot be changed","Edit User",string.Empty,userName);
+                    return SystemSucceededTask.Failed("Username for Admin cannot be changed",string.Empty,false,true);
             }
 
 
@@ -154,27 +193,28 @@ namespace Itsomax.Module.UserCore.Services
                         {
                             CreateUserAddDefaultClaimForUser(user);
                             UpdateClaimValueForRoleForUser(user);
-                            return SucceededTask.Success;
+                            _logger.InformationLog("User "+model.UserName+" modified succesfully", "Create user", string.Empty, userName);
+                            return SystemSucceededTask.Success("User: "+user.UserName +" modified successfully");
                         }
-                        else
-                        {
-                            return SucceededTask.Failed("Failed editing user " + model.UserName + ", could not set lockout for user");
-                        }
+                        _logger.ErrorLog("User "+model.UserName+" modified unsuccesfully", "Create user", string.Empty, userName);
+                        return SystemSucceededTask.Failed(
+                            "Failed editing user " + model.UserName + ", could not set lockout for user",
+                            string.Empty, false, true);
                     }
-                    else
-                    {
-                        return SucceededTask.Failed("Failed editing user " + model.UserName+ ", could not update roles");
-                    }
+                    _logger.ErrorLog("User "+model.UserName+" modified unsuccesfully", "Create user", string.Empty, userName);
+                    return SystemSucceededTask.Failed(
+                        "Failed editing user " + model.UserName + ", could not set lockout for user",
+                        string.Empty, false, true);
                 }
-                else
-                {
-                    return SucceededTask.Failed("Failed editing user " + model.UserName+ ", could not update roles");
-                }
+                _logger.ErrorLog("User "+model.UserName+" modified unsuccesfully", "Create user", string.Empty, userName);
+                return SystemSucceededTask.Failed(
+                    "Failed editing user " + model.UserName + ", could not set lockout for user",
+                    string.Empty, false, true);
             }
-            else
-            {
-                return SucceededTask.Failed("Could not update user " + model.UserName);
-            }
+            _logger.ErrorLog("User "+model.UserName+" modified unsuccesfully", "Create user", string.Empty, userName);
+            return SystemSucceededTask.Failed(
+                "Failed editing user " + model.UserName + ", could not set lockout for user",
+                string.Empty, false, true);
 
 
         }
@@ -293,53 +333,6 @@ namespace Itsomax.Module.UserCore.Services
 
             
         }
-
-        public void AddDefaultClaimAllUsers()
-        {
-            //var users = _user.Query().ToList();
-            //foreach (var item in users)
-            //{
-                //CreateUserAddDefaultClaim(item.Id);
-            //}
-        }
-        /*
-        public bool CreateUserAddDefaultClaim(long id)
-        {
-            var user = _userManager.FindByIdAsync(id.ToString()).Result;
-
-            var claims = new List<Claim>();
-            var claimsRemove = new List<Claim>();
-
-            //claims.Add(new Claim("", ""));
-            var claimsList = _subModule.Query().Select(x => new
-            {
-                x.Name
-
-            }).ToList();
-            var claimExistDb = _userManager.GetClaimsAsync(user).Result;
-            foreach (var item in claimsList)
-            {
-                var claimExistDbType = claimExistDb.FirstOrDefault(x => x.Type == item.Name);
-                if (claimExistDbType == null)
-                {
-                    claims.Add(new Claim(item.Name, "NoAccess"));
-                }
-
-            }
-            var res = _userManager.AddClaimsAsync(user, claims).Result;
-            foreach (var item in claimExistDb)
-            {
-                var claimExistsDll = claimsList.FirstOrDefault(x => x.Name == item.Type);
-                if (claimExistsDll == null)
-                {
-                    claims.Remove(new Claim(item.Type, item.Value));
-                }
-
-            }
-            var resRem = _userManager.RemoveClaimsAsync(user, claimsRemove).Result;
-            return true;
-        }
-        */
 
         public bool CreateUserAddDefaultClaimForUser(User user)
         {
