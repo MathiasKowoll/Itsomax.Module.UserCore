@@ -10,6 +10,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Security.Claims;
+using Itsomax.Module.Core.Data;
 using Itsomax.Module.Core.Interfaces;
 
 namespace Itsomax.Module.UserCore.Services
@@ -21,20 +22,22 @@ namespace Itsomax.Module.UserCore.Services
         private readonly IRepository<User> _user;
         private readonly IRepository<Role> _role;
         private readonly IRepository<SubModule> _subModule;
-        private readonly IRepository<ModuleRole> _moduleRole;
+        //private readonly IRepository<ModuleRole> _moduleRole;
+        private readonly ItsomaxDbContext _context;
         private readonly ILogginToDatabase _logger;
         private readonly SignInManager<User> _signIn;
 
         public ManageUser(UserManager<User> userManager, RoleManager<Role> roleManager,
                          IRepository<Role> role, IRepository<User> user, IRepository<SubModule> subModule,
-                         IRepository<ModuleRole> moduleRole, ILogginToDatabase logger,SignInManager<User> signIn)
+                         ItsomaxDbContext context,/*IRepository<ModuleRole> moduleRole,*/ ILogginToDatabase logger,SignInManager<User> signIn)
         {
             _roleManager = roleManager;
             _userManager = userManager;
             _user = user;
             _role = role;
             _subModule = subModule;
-            _moduleRole = moduleRole;
+            //_moduleRole = moduleRole;
+            _context = context;
             _logger = logger;
             _signIn = signIn;
 
@@ -221,13 +224,14 @@ namespace Itsomax.Module.UserCore.Services
 
         public void AddSubModulesToRole (long roleId,params string[] subModules)
         {
-            var modRole = _moduleRole.Query().Where(x => x.RoleId == roleId);
+            var modRole = _context.Set<ModuleRole>().Where(x => x.RoleId == roleId); //_moduleRole.Query().Where(x => x.RoleId == roleId);
             foreach (var item in modRole)
             {
-                var modrole = _moduleRole.Query().FirstOrDefault(x => x.RoleId == item.RoleId && x.SubModuleId == item.SubModuleId);
-                _moduleRole.Remove(modrole);
+                var modrole = _context.Set<ModuleRole>()
+                    .FirstOrDefault(x => x.RoleId == item.RoleId && x.SubModuleId == item.SubModuleId); //_moduleRole.Query().FirstOrDefault(x => x.RoleId == item.RoleId && x.SubModuleId == item.SubModuleId);
+                _context.Set<ModuleRole>().Remove(modrole); //_moduleRole.Remove(modrole);
             }
-            _moduleRole.SaveChanges();
+            _context.SaveChanges();//_moduleRole.SaveChanges();
 
             foreach (var item in subModules)
             {
@@ -239,10 +243,11 @@ namespace Itsomax.Module.UserCore.Services
                         RoleId = roleId,
                         SubModuleId = mod.Id
                     };
-                    _moduleRole.Add(modrole);
+                    _context.Set<ModuleRole>().AddRange(modRole); //_moduleRole.Add(modrole);
                 }
             }
-            _moduleRole.SaveChanges();
+
+            _context.SaveChanges();//_moduleRole.SaveChanges();
             UpdateClaimValueForRole();
         }
 
@@ -317,7 +322,7 @@ namespace Itsomax.Module.UserCore.Services
             try
             {
                 var subModRole =
-                from mr in _moduleRole.Query()
+                from mr in _context.Set<ModuleRole>() //_moduleRole.Query()
                 join sb in _subModule.Query() on mr.SubModuleId equals sb.Id
                 where mr.RoleId == id
                 select (sb.Name);
