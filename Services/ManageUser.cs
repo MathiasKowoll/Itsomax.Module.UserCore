@@ -229,7 +229,7 @@ namespace Itsomax.Module.UserCore.Services
             {
                 var modrole = _context.Set<ModuleRole>()
                     .FirstOrDefault(x => x.RoleId == item.RoleId && x.SubModuleId == item.SubModuleId); //_moduleRole.Query().FirstOrDefault(x => x.RoleId == item.RoleId && x.SubModuleId == item.SubModuleId);
-                _context.Set<ModuleRole>().Remove(modrole); //_moduleRole.Remove(modrole);
+                if (modrole != null) _context.Set<ModuleRole>().Remove(modrole); //_moduleRole.Remove(modrole);
             }
             _context.SaveChanges();//_moduleRole.SaveChanges();
 
