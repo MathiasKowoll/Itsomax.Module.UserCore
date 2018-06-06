@@ -22,21 +22,19 @@ namespace Itsomax.Module.UserCore.Services
         private readonly IRepository<User> _user;
         private readonly IRepository<Role> _role;
         private readonly IRepository<SubModule> _subModule;
-        //private readonly IRepository<ModuleRole> _moduleRole;
         private readonly ItsomaxDbContext _context;
         private readonly ILogginToDatabase _logger;
         private readonly SignInManager<User> _signIn;
 
         public ManageUser(UserManager<User> userManager, RoleManager<Role> roleManager,
                          IRepository<Role> role, IRepository<User> user, IRepository<SubModule> subModule,
-                         ItsomaxDbContext context,/*IRepository<ModuleRole> moduleRole,*/ ILogginToDatabase logger,SignInManager<User> signIn)
+                         ItsomaxDbContext context, ILogginToDatabase logger, SignInManager<User> signIn)
         {
             _roleManager = roleManager;
             _userManager = userManager;
             _user = user;
             _role = role;
             _subModule = subModule;
-            //_moduleRole = moduleRole;
             _context = context;
             _logger = logger;
             _signIn = signIn;
@@ -50,13 +48,17 @@ namespace Itsomax.Module.UserCore.Services
                 var user = await _userManager.FindByNameAsync(model.UserName);
                 if (user == null)
                 {
-                    _logger.ErrorLog("User does not exists or tried to enter null value for user.","Login User",string.Empty,model.UserName);
-                    return SystemSucceededTask.Failed("User does not exists or tried to enter null value for user.",string.Empty,false,true);
+                    _logger.ErrorLog("User does not exists or tried to enter null value for user.", "Login User",
+                        string.Empty, model.UserName);
+                    return SystemSucceededTask.Failed("User does not exists or tried to enter null value for user.",
+                        string.Empty, false, true);
                 }
                 if (user.IsDeleted)
                 {
-                    _logger.ErrorLog("User: "+user.UserName+" has been disabled","Login User",string.Empty,model.UserName);
-                    return SystemSucceededTask.Failed("User: "+user.UserName+" has been disabled","Login User",false,true);
+                    _logger.ErrorLog("User: " + user.UserName + " has been disabled", "Login User", string.Empty,
+                        model.UserName);
+                    return SystemSucceededTask.Failed("User: " + user.UserName + " has been disabled", "Login User",
+                        false, true);
                 }
 
                 try
@@ -66,33 +68,41 @@ namespace Itsomax.Module.UserCore.Services
                     {
                         CreateUserAddDefaultClaimForUser(user);
                         UpdateClaimValueForRoleForUser(user);
-                        _logger.InformationLog("User: "+user.UserName+" logged successfully","Login User",string.Empty,model.UserName);
+                        _logger.InformationLog("User: " + user.UserName + " logged successfully", "Login User",
+                            string.Empty, model.UserName);
                         return SystemSucceededTask.Success("");
                     }
                     if (res.IsLockedOut)
                     {
-                        _logger.ErrorLog("User: "+user.UserName+" has been locked out","Login User",string.Empty,model.UserName);
-                        return SystemSucceededTask.Failed("User " + user.UserName + " is lockout","Login User",false,true);
+                        _logger.ErrorLog("User: " + user.UserName + " has been locked out", "Login User", string.Empty,
+                            model.UserName);
+                        return SystemSucceededTask.Failed("User " + user.UserName + " is lockout", "Login User", false,
+                            true);
                     }
-                    _logger.ErrorLog("User: "+user.UserName+" could not be logged in","Login User",string.Empty,model.UserName);
-                    return SystemSucceededTask.Failed("User: "+user.UserName+" could not be logged in","Login User",false,true);
+
+                    _logger.ErrorLog("User: " + user.UserName + " could not be logged in", "Login User", string.Empty,
+                        model.UserName);
+                    return SystemSucceededTask.Failed("User: " + user.UserName + " could not be logged in",
+                        "Login User", false, true);
                 }
                 catch (Exception ex)
                 {
                     _logger.ErrorLog(ex.Message,"Login User",ex.InnerException.Message,model.UserName);
-                    return SystemSucceededTask.Failed("User: "+model.UserName+" could not be logged in","Login User",true,false);
+                    return SystemSucceededTask.Failed("User: " + model.UserName + " could not be logged in",
+                        "Login User", true, false);
                 }
                 
             }
             catch (Exception ex)
             {
                 _logger.ErrorLog(ex.Message,"Login User",ex.InnerException.Message,model.UserName);
-                return SystemSucceededTask.Failed("User: "+model.UserName+" could not be logged in","Login User",true,false);
+                return SystemSucceededTask.Failed("User: " + model.UserName + " could not be logged in", "Login User",
+                    true, false);
             }
-            
         }
 
-        public async Task<SystemSucceededTask> EditRole(EditRoleViewModel model,string userName, params string [] subModulesAdd)
+        public async Task<SystemSucceededTask> EditRole(EditRoleViewModel model,string userName, 
+            params string [] subModulesAdd)
         {
             try
             {
@@ -105,26 +115,30 @@ namespace Itsomax.Module.UserCore.Services
                     if (res.Succeeded)
                     {
                         AddSubModulesToRole(role.Id,subModulesAdd);
-                        _logger.InformationLog("Role: "+role.Name+ " updated successfully","Role Edit",string.Empty,userName);
+                        _logger.InformationLog("Role: " + role.Name + " updated successfully", "Role Edit",
+                            string.Empty, userName);
                         return SystemSucceededTask.Success("Role: "+role.Name+ " updated successfully");
                     }
                 }
                 catch (Exception ex)
                 {
                     _logger.ErrorLog(ex.Message,"Edit Role",ex.InnerException.Message,userName);
-                    return SystemSucceededTask.Failed("Role: "+model.RoleName+ " updated unsuccessfully",ex.InnerException.Message,true,false);
+                    return SystemSucceededTask.Failed("Role: " + model.RoleName + " updated unsuccessfully",
+                        ex.InnerException.Message, true, false);
                 }
             }
             catch (Exception ex)
             {
                 _logger.ErrorLog(ex.Message,"Edit Role",ex.InnerException.Message,userName);
-                return SystemSucceededTask.Failed("Role: "+model.RoleName+ " updated unsuccessfully",ex.InnerException.Message,true,false);
+                return SystemSucceededTask.Failed("Role: " + model.RoleName + " updated unsuccessfully",
+                    ex.InnerException.Message, true, false);
             }
             _logger.ErrorLog("Unhandled error","Edit Role",string.Empty,userName);
             return SystemSucceededTask.Failed("Role: "+model.RoleName+ " updated successfully",string.Empty,true,false);
         }
 
-        public async Task<SystemSucceededTask> CreateUserAsync(CreateUserViewModel model,string userName,params string[] selectedRoles)
+        public async Task<SystemSucceededTask> CreateUserAsync(CreateUserViewModel model,string userName,
+            params string[] selectedRoles)
         {
             var user = new User()
             {
@@ -140,21 +154,23 @@ namespace Itsomax.Module.UserCore.Services
                 {
                     CreateUserAddDefaultClaimForUser(user);
                     UpdateClaimValueForRoleForUser(user);
-                    _logger.InformationLog("User "+model.UserName+" has been created succesfully", "Create user", string.Empty, userName);
+                    _logger.InformationLog("User " + model.UserName + " has been created succesfully", "Create user",
+                        string.Empty, userName);
                     return SystemSucceededTask.Success("User: " +model.UserName+" created successfully");
                 }
 
                 await _userManager.DeleteAsync(user);
                 _logger.ErrorLog("Error while creating user ", "Create user", string.Empty, userName);
-                return SystemSucceededTask.Failed("Error while creating user " + model.UserName,string.Empty,false,true);
+                return SystemSucceededTask.Failed("Error while creating user " + model.UserName, string.Empty, false,
+                    true);
             }
             _logger.ErrorLog("Error while creating user ", "Create user", string.Empty, userName);
             return SystemSucceededTask.Failed("Error while creating user " + model.UserName,string.Empty,false,true);
         }
 
-        public async Task<SystemSucceededTask> EditUserAsync(EditUserViewModel model,string userName, params string[] rolesAdd)
+        public async Task<SystemSucceededTask> EditUserAsync(EditUserViewModel model,string userName, 
+            params string[] rolesAdd)
         {
-            //var roles = GetUserRolesToSelectListItem(model.Id);
             var user = await _userManager.FindByIdAsync(model.Id.ToString());
             if ((user == null) || (user.Id != model.Id))
             {
@@ -196,25 +212,34 @@ namespace Itsomax.Module.UserCore.Services
                         {
                             CreateUserAddDefaultClaimForUser(user);
                             UpdateClaimValueForRoleForUser(user);
-                            _logger.InformationLog("User "+model.UserName+" modified succesfully", "Create user", string.Empty, userName);
+                            _logger.InformationLog("User " + model.UserName + " modified succesfully", "Create user",
+                                string.Empty, userName);
                             return SystemSucceededTask.Success("User: "+user.UserName +" modified successfully");
                         }
-                        _logger.ErrorLog("User "+model.UserName+" modified unsuccesfully", "Create user", string.Empty, userName);
+
+                        _logger.ErrorLog("User " + model.UserName + " modified unsuccesfully", "Create user",
+                            string.Empty, userName);
                         return SystemSucceededTask.Failed(
                             "Failed editing user " + model.UserName + ", could not set lockout for user",
                             string.Empty, false, true);
                     }
-                    _logger.ErrorLog("User "+model.UserName+" modified unsuccesfully", "Create user", string.Empty, userName);
+
+                    _logger.ErrorLog("User " + model.UserName + " modified unsuccesfully", "Create user", string.Empty,
+                        userName);
                     return SystemSucceededTask.Failed(
                         "Failed editing user " + model.UserName + ", could not set lockout for user",
                         string.Empty, false, true);
                 }
-                _logger.ErrorLog("User "+model.UserName+" modified unsuccesfully", "Create user", string.Empty, userName);
+
+                _logger.ErrorLog("User " + model.UserName + " modified unsuccesfully", "Create user", string.Empty,
+                    userName);
                 return SystemSucceededTask.Failed(
                     "Failed editing user " + model.UserName + ", could not set lockout for user",
                     string.Empty, false, true);
             }
-            _logger.ErrorLog("User "+model.UserName+" modified unsuccesfully", "Create user", string.Empty, userName);
+
+            _logger.ErrorLog("User " + model.UserName + " modified unsuccesfully", "Create user", string.Empty,
+                userName);
             return SystemSucceededTask.Failed(
                 "Failed editing user " + model.UserName + ", could not set lockout for user",
                 string.Empty, false, true);
@@ -224,14 +249,14 @@ namespace Itsomax.Module.UserCore.Services
 
         public void AddSubModulesToRole (long roleId,params string[] subModules)
         {
-            var modRole = _context.Set<ModuleRole>().Where(x => x.RoleId == roleId); //_moduleRole.Query().Where(x => x.RoleId == roleId);
+            var modRole = _context.Set<ModuleRole>().Where(x => x.RoleId == roleId); 
             foreach (var item in modRole)
             {
                 var modrole = _context.Set<ModuleRole>()
-                    .FirstOrDefault(x => x.RoleId == item.RoleId && x.SubModuleId == item.SubModuleId); //_moduleRole.Query().FirstOrDefault(x => x.RoleId == item.RoleId && x.SubModuleId == item.SubModuleId);
-                if (modrole != null) _context.Set<ModuleRole>().Remove(modrole); //_moduleRole.Remove(modrole);
+                    .FirstOrDefault(x => x.RoleId == item.RoleId && x.SubModuleId == item.SubModuleId);
+                if (modrole != null) _context.Set<ModuleRole>().Remove(modrole); 
             }
-            _context.SaveChanges();//_moduleRole.SaveChanges();
+            _context.SaveChanges();
 
             foreach (var item in subModules)
             {
@@ -243,11 +268,11 @@ namespace Itsomax.Module.UserCore.Services
                         RoleId = roleId,
                         SubModuleId = mod.Id
                     };
-                    _context.Set<ModuleRole>().AddRange(modRole); //_moduleRole.Add(modrole);
+                    _context.Set<ModuleRole>().AddRange(modRole); 
                 }
             }
 
-            _context.SaveChanges();//_moduleRole.SaveChanges();
+            _context.SaveChanges();
             UpdateClaimValueForRole();
         }
 
@@ -322,7 +347,7 @@ namespace Itsomax.Module.UserCore.Services
             try
             {
                 var subModRole =
-                from mr in _context.Set<ModuleRole>() //_moduleRole.Query()
+                from mr in _context.Set<ModuleRole>()
                 join sb in _subModule.Query() on mr.SubModuleId equals sb.Id
                 where mr.RoleId == id
                 select (sb.Name);
@@ -332,11 +357,9 @@ namespace Itsomax.Module.UserCore.Services
             catch(Exception ex)
             {
                 _logger.ErrorLog(ex.Message, "GetSubmodulesByRoleId", ex.InnerException.Message);
-                //var subModule = new List<string> ();
                 return null;
             }
 
-            
         }
 
         public bool CreateUserAddDefaultClaimForUser(User user)
@@ -344,7 +367,6 @@ namespace Itsomax.Module.UserCore.Services
             var claims = new List<Claim>();
             var claimsRemove = new List<Claim>();
 
-            //claims.Add(new Claim("", ""));
             var claimsList = _subModule.Query().Select(x => new
             {
                 x.Name
