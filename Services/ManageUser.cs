@@ -154,18 +154,23 @@ namespace Itsomax.Module.UserCore.Services
                 {
                     CreateUserAddDefaultClaimForUser(user);
                     UpdateClaimValueForRoleForUser(user);
-                    _logger.InformationLog("User " + model.UserName + " has been created succesfully", "Create user",
+                    _logger.InformationLog("User " + model.UserName + " has been created successfully", "Create user",
                         string.Empty, userName);
                     return SystemSucceededTask.Success("User: " +model.UserName+" created successfully");
                 }
 
                 await _userManager.DeleteAsync(user);
                 _logger.ErrorLog("Error while creating user ", "Create user", string.Empty, userName);
-                return SystemSucceededTask.Failed("Error while creating user " + model.UserName, string.Empty, false,
-                    true);
+                return SystemSucceededTask.Failed("Error while creating user " + model.UserName, string.Empty, false,true);
             }
-            _logger.ErrorLog("Error while creating user ", "Create user", string.Empty, userName);
-            return SystemSucceededTask.Failed("Error while creating user " + model.UserName,string.Empty,false,true);
+
+            var error = "Error while creating user " + model.UserName + ". ";
+            foreach (var item in resCreateUser.Errors)
+            {
+                error = error + item.Description + ". ";
+            }
+            _logger.ErrorLog(error, "Create user", string.Empty, userName);
+            return SystemSucceededTask.Failed(error, string.Empty,false,true);
         }
 
         public async Task<SystemSucceededTask> EditUserAsync(EditUserViewModel model,string userName, 
