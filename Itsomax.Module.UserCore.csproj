@@ -18,8 +18,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Itsomax.Module.Core\Itsomax.Module.Core.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" />
-  </ItemGroup>
 </Project>
