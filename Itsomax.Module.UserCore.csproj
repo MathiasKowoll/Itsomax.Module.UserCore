@@ -2,9 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <RuntimeFrameworkVersion>2.1.6</RuntimeFrameworkVersion>
-    <PreserveCompilationContext>false</PreserveCompilationContext>
-    <EnableDefaultContentItems>false</EnableDefaultContentItems>
     <OutputType>Library</OutputType>
     <Description>Module to manage users, roles and permitions over modules</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -18,9 +15,5 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Itsomax.Module.Core\Itsomax.Module.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" />
   </ItemGroup>
 </Project>
