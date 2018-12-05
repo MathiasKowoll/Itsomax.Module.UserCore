@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <OutputType>Library</OutputType>
     <Description>Module to manage users, roles and permitions over modules</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
