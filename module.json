@@ -1,6 +1,7 @@
 {
-  "name": "usercore",
-  "fullName": "Itsomax.Module.UserCore",
-  "version": "1.0.8",
-  "project":  "All" 
+  "id": "Itsomax.Module.UserCore",
+  "name": "UserCore",
+  "isBundledWithHost": false,
+  "version": "1.0.0",
+  "project":  "All"
 }
