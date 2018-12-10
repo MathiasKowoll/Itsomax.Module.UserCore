@@ -1,17 +1,17 @@
-using Itsomax.Module.UserCore.Interfaces;
-using Itsomax.Module.Core.Extensions;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using Itsomax.Module.Core.Models;
 using System;
-using Itsomax.Module.UserCore.ViewModels;
-using Itsomax.Data.Infrastructure.Data;
-using System.Linq;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
+using Itsomax.Data.Infrastructure.Data;
 using Itsomax.Module.Core.Data;
+using Itsomax.Module.Core.Extensions;
 using Itsomax.Module.Core.Interfaces;
+using Itsomax.Module.Core.Models;
+using Itsomax.Module.UserCore.Interfaces;
+using Itsomax.Module.UserCore.ViewModels;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Itsomax.Module.UserCore.Services
 {

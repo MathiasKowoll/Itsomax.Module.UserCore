@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+
 namespace Itsomax.Module.UserCore.ViewModels
 {
     public class ChangePasswordViewModel
