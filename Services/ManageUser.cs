@@ -266,15 +266,13 @@ namespace Itsomax.Module.UserCore.Services
             foreach (var item in subModules)
             {
                 var mod = _subModule.Query().FirstOrDefault(x => x.Name.Contains(item));
-                if (mod != null)
+                if (mod == null) continue;
+                var newModrole = new ModuleRole
                 {
-                    ModuleRole modrole = new ModuleRole
-                    {
-                        RoleId = roleId,
-                        SubModuleId = mod.Id
-                    };
-                    _context.Set<ModuleRole>().AddRange(modRole); 
-                }
+                    RoleId = roleId,
+                    SubModuleId = mod.Id
+                };
+                _context.Set<ModuleRole>().Add(newModrole);
             }
 
             _context.SaveChanges();
@@ -406,28 +404,8 @@ namespace Itsomax.Module.UserCore.Services
             var users = _user.Query().ToList();
             foreach (var itemUser in users)
             {
-                var user = _userManager.FindByIdAsync(itemUser.Id.ToString()).Result;
-                var roles = _userManager.GetRolesAsync(user).Result;
-                var rolesDb = _role.Query().Where(x => roles.Contains(x.Name)).ToList();
-                var subModules = _subModule.Query().ToList();
-
-                foreach (var subMod in subModules)
-                {
-                    var oldClaim = _userManager.GetClaimsAsync(user).Result.FirstOrDefault(x => x.Type == subMod.Name);
-                    var newClaim = new Claim(subMod.Name, "NoAccess");
-                    var res =_userManager.ReplaceClaimAsync(user, oldClaim, newClaim).Result;
-                }
-                
-                foreach (var role in rolesDb)
-                {
-                    var subModulesUser = GetSubmodulesByRoleId(role.Id);
-                    foreach (var item in subModulesUser)
-                    {
-                        var oldClaim = _userManager.GetClaimsAsync(user).Result.FirstOrDefault(x => x.Type == item);
-                        var newClaim = new Claim(item, "HasAccess");
-                        var res = _userManager.ReplaceClaimAsync(user, oldClaim, newClaim).Result;
-                    }
-                }
+                CreateUserAddDefaultClaimForUser(itemUser);
+                UpdateClaimValueForRoleForUser(itemUser);
             }
 
         }
