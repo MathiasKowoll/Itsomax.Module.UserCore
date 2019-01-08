@@ -326,7 +326,7 @@ namespace Itsomax.Module.UserCore.Services
                 {
                     return null;
                 }
-                var subModule = _subModule.Query().ToList().Select(x => new SelectListItem
+                var subModule = _subModule.Query().ToList().Where(x => x.ActiveSubModule).Select(x => new SelectListItem
                 {
                     Selected = subModuleRole.Contains(x.Name),
                     Text = x.Name,
@@ -352,7 +352,7 @@ namespace Itsomax.Module.UserCore.Services
                 var subModRole =
                 from mr in _context.Set<ModuleRole>()
                 join sb in _subModule.Query() on mr.SubModuleId equals sb.Id
-                where mr.RoleId == id
+                where mr.RoleId == id && sb.ActiveSubModule
                 select (sb.Name);
 
                 return (subModRole.ToList());
