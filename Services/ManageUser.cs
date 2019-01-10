@@ -265,7 +265,7 @@ namespace Itsomax.Module.UserCore.Services
 
             foreach (var item in subModules)
             {
-                var mod = _subModule.Query().FirstOrDefault(x => x.Name.Contains(item));
+                var mod = _subModule.Query().Where(x => x.ActiveSubModule).FirstOrDefault(x => x.Name.Contains(item));
                 if (mod == null) continue;
                 var newModrole = new ModuleRole
                 {
@@ -370,7 +370,7 @@ namespace Itsomax.Module.UserCore.Services
             var claims = new List<Claim>();
             var claimsRemove = new List<Claim>();
 
-            var claimsList = _subModule.Query().Select(x => new
+            var claimsList = _subModule.Query().Where(x => x.ActiveSubModule).Select(x => new
             {
                 x.Name
 
